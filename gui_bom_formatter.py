@@ -14,8 +14,7 @@ root.resizable(False, False)
 root.geometry('700x150')
 
 text_box = Text(root, height = 1, width = 75, wrap=NONE)
-#root.columnconfigure(0, weight=1, minsize=75)
-#root.rowconfigure(0, weight=1, minsize=50)
+
 
 
 
@@ -24,12 +23,13 @@ text_box = Text(root, height = 1, width = 75, wrap=NONE)
 def select_file():
     filetypes = (
         ('text files', '*.txt'),
+        ('text files', '*.csv'),
         ('All files', '*.*')
     )
 
     filename = fd.askopenfilename(
         title='Open a file',
-        initialdir='/',
+        initialdir=r'C:\Users\Chase\Desktop\Bom_formatter\Bom_formatter',
         filetypes=filetypes)
 
     text_box.delete(0.0,'end')
@@ -40,32 +40,22 @@ def select_file():
 
 
 ###################################################################
-def copy():
-   source_file = text_box.get(0.0,'end')
-   working_file = os.path.dirname(source_file)
-   print("dir")
-   print(working_file)
-   working_file += "/copy.csv"
-   print("working file")
-   print(working_file)
-   source_file = source_file.strip()
-   print("source file")
-   print(source_file)
+def format():
+   source_file = text_box.get(0.0,'end')    #get source file from text box
+   working_file = os.path.dirname(source_file)  #get path
+
+   working_file += "/output.csv"    #add on our new name
+ 
+   source_file = source_file.strip()    #strip any rouge newlines
+
    if os.path.exists(working_file):
-    os.remove(working_file)
+    os.remove(working_file)     #if old file is there, delete it
    else:
     print("No file to delete.")
 
-   #make name for new file
-   
-   output_file = os.path.dirname(source_file)
-   output_file += "/output.csv"
-   print("output file")
-   print(output_file)
-   # make a copy of our file
-   shutil.copyfile(source_file, working_file)
-   reader = csv.reader(open(working_file, "r"), delimiter=';')
-   writer = csv.writer(open(output_file, 'w' , newline=''), delimiter=',')
+   #replace the semicolons for commas into the output file
+   reader = csv.reader(open(source_file, "r"), delimiter=';')   
+   writer = csv.writer(open(working_file, 'w' , newline=''), delimiter=',')
    writer.writerows(reader)
 ###################################################################
 
@@ -81,7 +71,7 @@ browse_button = ttk.Button(
 format_button = ttk.Button(
     root,
     text='format',
-    command=copy
+    command=format
 )
 #open_button.pack(expand=True)
 
