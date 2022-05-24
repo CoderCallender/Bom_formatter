@@ -31,14 +31,16 @@ def make_json(csvFilePath, jsonFilePath):
 
 # Decide the two file paths according to your
 # computer system
-csvFilePath = r'C:\Users\Chase\Desktop\Bom_formatter\Bom_formatter\output.csv'
-jsonFilePath = r'C:\Users\Chase\Desktop\Bom_formatter\Bom_formatter\output.json'
+
+
+csvFilePath = r'C:\Users\callende\Desktop\Bom_formatter\output.csv'
+jsonFilePath = r'C:\Users\callende\Desktop\Bom_formatter\output.json'
 
 df = pd.read_csv(csvFilePath)
 
 df["Item"] = "abc"
 
-df.to_csv("sample.csv", index=0)
+df.to_csv(csvFilePath, index=0)
  
 # Call the make_json function
 make_json(csvFilePath, jsonFilePath)
