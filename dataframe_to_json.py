@@ -3,6 +3,8 @@ import simplejson as json
 import pandas as pd
 import string
 import sys
+import requests
+import time
 
 #returns a new dictionary that only has the values we want (described by the list "wanted_data")
 #dict_to_csv(working_data)  #example dump to csv
@@ -39,6 +41,8 @@ def dict_to_json(dict):
         json.dump(dict, outfile, indent=4, ignore_nan=True)
 
 
+def dict_to_dataframe(dict):
+    return pd.DataFrame.from_dict(dict, orient ='index')
 
 #return a list of all the values for a given item request
 #example get all the manufacturers as a list
@@ -79,7 +83,12 @@ def get_index(dict, search_header, search_term):
             #print(key)
     return list
 
-#get all the entries in a given header that is empty
+def return_coloumn_values(dict, header):
+   
+    for key in dict:
+        print(dict[key][header])
+
+#get all the entries in a given header that are empty
 def get_empty_entries(dict, search_header):
         #create list
     list = []
@@ -100,6 +109,54 @@ def print_list(dict, list):
         print(dict[list[x]])
         x += 1
 
+#get the farnell stock level for a given farnell part number
+def get_farnell_stock_qty(part_number):
+
+ 
+    url = "https://api.element14.com/catalog/products?versionNumber=1.2&term=id%3A"
+    url = url + part_number
+    url = url + "&storeInfo.id=uk.farnell.com&resultsSettings.offset=0&resultsSettings.numberOfResults=1&resultsSettings.refinements.filters=rohsCompliant%2CinStock&resultsSettings.responseGroup=large&callInfo.omitXmlSchema=false&callInfo.responseDataFormat=json&callinfo.apiKey=rhcf7dupd8arzxtvqubksbbw"
+    response = requests.get(url)
+    data = response.json()
+    #print(data['premierFarnellPartNumberReturn']['products'][0]['stock']['level']) # 
+    try:
+        return data['premierFarnellPartNumberReturn']['products'][0]['stock']['level'] # 
+    except KeyError:
+        return "NOT FOUND"
+  
+
+def add_stock_levels(dict):
+    list = []
+    #get all the farnell stock levels
+    for key in dict:
+        
+
+        if(type(dict[key]["OC_FARNELL"])is str):
+            print("working...")
+            list.append(get_farnell_stock_qty(dict[key]["OC_FARNELL"]))
+            time.sleep(0.6) #not allowed to poll too often with Farnell
+        else:
+            print("N/A")
+            list.append("N/A")
+ #   print("list")
+ #   print(list)
+    #turn to a dataframe
+
+    df = dict_to_dataframe(dict)
+
+ #   print("list length")
+ #   print(len(list))
+#    print("df length")
+#    print(len(df.index))
+    df["FARNELL STOCK"] = list
+    print(df)
+    #add Farnell stock coloumn
+
+
+
+
+
+
 
 path = sys.path[0] + "\output.csv"  #create file path from location this program is in
 data_frame =pd.read_csv(path)       #read in the csv file
@@ -108,5 +165,7 @@ raw_dictionary = data_frame.to_dict(orient='index') #keep the data as a dictiona
 
 working_data = clean_dictionary(raw_dictionary) #get rid of the data we do not want
 
-empty_mpn_list = get_empty_entries(working_data, "MPN")  #get all empty MPN entries
-print_list(working_data,empty_mpn_list)
+add_stock_levels(working_data)
+#return_coloumn_values(working_data, "OC_FARNELL")
+#empty_mpn_list = get_empty_entries(working_data, "MPN")  #get all empty MPN entries
+#print_list(working_data,empty_mpn_list)
