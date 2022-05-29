@@ -5,6 +5,8 @@ import string
 import sys
 import requests
 import time
+import xlsxwriter
+from itertools import chain
 
 #returns a new dictionary that only has the values we want (described by the list "wanted_data")
 #dict_to_csv(working_data)  #example dump to csv
@@ -108,54 +110,6 @@ def print_list(dict, list):
     for item in list:
         print(dict[list[x]])
         x += 1
-
-#get the farnell stock level for a given farnell part number
-def get_farnell_stock_qty(part_number):
-
- 
-    url = "https://api.element14.com/catalog/products?versionNumber=1.2&term=id%3A"
-    url = url + part_number
-    url = url + "&storeInfo.id=uk.farnell.com&resultsSettings.offset=0&resultsSettings.numberOfResults=1&resultsSettings.refinements.filters=rohsCompliant%2CinStock&resultsSettings.responseGroup=large&callInfo.omitXmlSchema=false&callInfo.responseDataFormat=json&callinfo.apiKey=rhcf7dupd8arzxtvqubksbbw"
-    response = requests.get(url)
-    data = response.json()
-    #print(data['premierFarnellPartNumberReturn']['products'][0]['stock']['level']) # 
-    try:
-        return data['premierFarnellPartNumberReturn']['products'][0]['stock']['level'] # 
-    except KeyError:
-        return "NOT FOUND"
-  
-
-def add_stock_levels(dict):
-    list = []
-    #get all the farnell stock levels
-    for key in dict:
-        
-
-        if(type(dict[key]["OC_FARNELL"])is str):
-            print("working...")
-            list.append(get_farnell_stock_qty(dict[key]["OC_FARNELL"]))
-            time.sleep(0.6) #not allowed to poll too often with Farnell
-        else:
-            print("N/A")
-            list.append("N/A")
- #   print("list")
- #   print(list)
-    #turn to a dataframe
-
-    df = dict_to_dataframe(dict)
-
- #   print("list length")
- #   print(len(list))
-#    print("df length")
-#    print(len(df.index))
-    df["FARNELL STOCK"] = list
-    print(df)
-    #add Farnell stock coloumn
-
-
-
-
-
 
 
 path = sys.path[0] + "\output.csv"  #create file path from location this program is in
