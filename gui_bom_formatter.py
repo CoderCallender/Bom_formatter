@@ -6,6 +6,7 @@ from tkinter.messagebox import showinfo
 import shutil
 import os
 import csv
+import pandas as pd
 
 # create the root window
 root = tk.Tk()
@@ -59,6 +60,11 @@ def select_file():
 
 ###################################################################
 
+def convertToxlsx(file):
+
+	read_file = pd.read_csv(file)
+	read_file.to_excel (r'C:\Users\Chase\Desktop\Bom_formatter\Bom_formatter\NEW.xlsx', index = None, header=True)
+
 
 ###################################################################
 #
@@ -84,6 +90,7 @@ def format(file_names):
    writer.writerows(reader)
    
    #copy to a xlsm file
+   convertToxlsx(file_names.working_file)
   # output = os.path.dirname(file_names.source_file)  #get path
  #  output += "/output."    #add on our new name
   # shutil.copyfile(file_names.working_file, output)
